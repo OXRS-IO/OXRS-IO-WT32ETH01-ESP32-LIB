@@ -5,7 +5,6 @@
 #ifndef OXRS_WT32ETH01_H
 #define OXRS_WT32ETH01_H
 
-#include <WebServer_WT32_ETH01.h>     // For WT32-ETH01 networking from https://github.com/khoih-prog/WebServer_WT32_ETH01
 #include <OXRS_MQTT.h>                // For MQTT pub/sub
 #include <OXRS_API.h>                 // For REST API
 
