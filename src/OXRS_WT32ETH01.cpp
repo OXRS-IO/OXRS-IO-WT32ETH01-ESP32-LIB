@@ -25,7 +25,7 @@ OXRS_MQTT _mqtt(_mqttClient);
 OXRS_API _api(_mqtt);
 
 // Logging (topic updated once MQTT connects successfully)
-MqttLogger _logger(_mqttClient, "log", MqttLoggerMode::MqttAndSerial);
+MqttLogger _logger(_mqttClient, "log", MQTT_LOGGER_MODE);
 
 // Supported firmware config and command schemas
 DynamicJsonDocument _fwConfigSchema(JSON_CONFIG_MAX_SIZE);

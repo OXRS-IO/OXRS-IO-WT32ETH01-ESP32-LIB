@@ -12,8 +12,15 @@
 #define       I2C_SDA                   2
 #define       I2C_SCL                   4
 
-// REST API
+// Default REST API to port 80
+#ifndef       REST_API_PORT
 #define       REST_API_PORT             80
+#endif
+
+// Default to MQTT + Serial logging
+#ifndef       MQTT_LOGGER_MODE
+#define       MQTT_LOGGER_MODE          MqttLoggerMode::MqttAndSerial
+#endif
 
 class OXRS_WT32ETH01 : public Print
 {
