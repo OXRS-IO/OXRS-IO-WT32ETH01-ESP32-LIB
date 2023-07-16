@@ -343,12 +343,12 @@ boolean OXRS_WT32ETH01::publishTelemetry(JsonVariant json)
   return _mqtt.publishTelemetry(json);
 }
 
-bool OXRS_Room8266::isHassDiscoveryEnabled()
+bool OXRS_WT32ETH01::isHassDiscoveryEnabled()
 {
   return _hassDiscoveryEnabled;
 }
 
-void OXRS_Room8266::getHassDiscoveryJson(JsonVariant json, char * id)
+void OXRS_WT32ETH01::getHassDiscoveryJson(JsonVariant json, char * id)
 {
   _mqtt.getHassDiscoveryJson(json, id);
 
@@ -359,7 +359,7 @@ void OXRS_Room8266::getHassDiscoveryJson(JsonVariant json, char * id)
   json["dev"]["hw"] = "WT32-ETH01";
 }
 
-bool OXRS_Room8266::publishHassDiscovery(JsonVariant json, char * component, char * id)
+bool OXRS_WT32ETH01::publishHassDiscovery(JsonVariant json, char * component, char * id)
 {
   // Exit early if Home Assistant discovery not enabled
   if (!_hassDiscoveryEnabled) { return false; }
