@@ -35,9 +35,6 @@ DynamicJsonDocument _fwCommandSchema(JSON_COMMAND_MAX_SIZE);
 jsonCallback _onConfig;
 jsonCallback _onCommand;
 
-// Home Assistant discovery config
-bool _hassDiscoveryEnabled = false;
-
 /* JSON helpers */
 void _mergeJson(JsonVariant dst, JsonVariantConst src)
 {
@@ -117,17 +114,6 @@ void _getConfigSchemaJson(JsonVariant json)
   {
     _mergeJson(properties, _fwConfigSchema.as<JsonVariant>());
   }
-
-  // Home Assistant discovery config
-  JsonObject hassDiscoveryEnabled = properties.createNestedObject("hassDiscoveryEnabled");
-  hassDiscoveryEnabled["title"] = "Home Assistant Discovery";
-  hassDiscoveryEnabled["description"] = "Publish Home Assistant discovery config (defaults to 'false`).";
-  hassDiscoveryEnabled["type"] = "boolean";
-
-  JsonObject hassDiscoveryTopicPrefix = properties.createNestedObject("hassDiscoveryTopicPrefix");
-  hassDiscoveryTopicPrefix["title"] = "Home Assistant Discovery Topic Prefix";
-  hassDiscoveryTopicPrefix["description"] = "Prefix for the Home Assistant discovery topic (defaults to 'homeassistant`).";
-  hassDiscoveryTopicPrefix["type"] = "string";
 }
 
 void _getCommandSchemaJson(JsonVariant json)
@@ -218,17 +204,6 @@ void _mqttDisconnected(int state)
 
 void _mqttConfig(JsonVariant json)
 {
-  // Home Assistant discovery config
-  if (json.containsKey("hassDiscoveryEnabled"))
-  {
-    _hassDiscoveryEnabled = json["hassDiscoveryEnabled"].as<bool>();
-  }
-
-  if (json.containsKey("hassDiscoveryTopicPrefix"))
-  {
-    _mqtt.setHassDiscoveryTopicPrefix(json["hassDiscoveryTopicPrefix"]);
-  }
-
   // Pass on to the firmware callback
   if (_onConfig) { _onConfig(json); }
 }
@@ -341,32 +316,6 @@ boolean OXRS_WT32ETH01::publishTelemetry(JsonVariant json)
   // Exit early if no network connection
   if (!_isNetworkConnected()) { return false; }
   return _mqtt.publishTelemetry(json);
-}
-
-bool OXRS_WT32ETH01::isHassDiscoveryEnabled()
-{
-  return _hassDiscoveryEnabled;
-}
-
-void OXRS_WT32ETH01::getHassDiscoveryJson(JsonVariant json, char * id)
-{
-  _mqtt.getHassDiscoveryJson(json, id);
-
-  // Update the firmware details
-  json["dev"]["mf"] = FW_MAKER;
-  json["dev"]["mdl"] = FW_NAME;
-  json["dev"]["sw"] = STRINGIFY(FW_VERSION);
-  json["dev"]["hw"] = "WT32-ETH01";
-}
-
-bool OXRS_WT32ETH01::publishHassDiscovery(JsonVariant json, char * component, char * id)
-{
-  // Exit early if Home Assistant discovery not enabled
-  if (!_hassDiscoveryEnabled) { return false; }
-
-  // Exit early if no network connection
-  if (!_isNetworkConnected()) { return false; }
-  return _mqtt.publishHassDiscovery(json, component, id);
 }
 
 size_t OXRS_WT32ETH01::write(uint8_t character)
