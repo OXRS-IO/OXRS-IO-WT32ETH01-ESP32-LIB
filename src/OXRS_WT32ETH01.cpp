@@ -28,8 +28,8 @@ OXRS_API _api(_mqtt);
 MqttLogger _logger(_mqttClient, "log", MQTT_LOGGER_MODE);
 
 // Supported firmware config and command schemas
-DynamicJsonDocument _fwConfigSchema(JSON_CONFIG_MAX_SIZE);
-DynamicJsonDocument _fwCommandSchema(JSON_COMMAND_MAX_SIZE);
+JsonDocument _fwConfigSchema;
+JsonDocument _fwCommandSchema;
 
 // MQTT callbacks wrapped by _mqttConfig/_mqttCommand
 jsonCallback _onConfig;
@@ -61,7 +61,7 @@ void _mergeJson(JsonVariant dst, JsonVariantConst src)
 /* Adoption info builders */
 void _getFirmwareJson(JsonVariant json)
 {
-  JsonObject firmware = json.createNestedObject("firmware");
+  JsonObject firmware = json["firmware"].to<JsonObject>();
 
   firmware["name"] = FW_NAME;
   firmware["shortName"] = FW_SHORT_NAME;
@@ -75,7 +75,7 @@ void _getFirmwareJson(JsonVariant json)
 
 void _getSystemJson(JsonVariant json)
 {
-  JsonObject system = json.createNestedObject("system");
+  JsonObject system = json["system"].to<JsonObject>();
 
   system["heapUsedBytes"] = ESP.getHeapSize();
   system["heapFreeBytes"] = ESP.getFreeHeap();
@@ -91,7 +91,7 @@ void _getSystemJson(JsonVariant json)
 
 void _getNetworkJson(JsonVariant json)
 {
-  JsonObject network = json.createNestedObject("network");
+  JsonObject network = json["network"].to<JsonObject>();
 
   network["mode"] = "ethernet";
   network["ip"] = ETH.localIP();
@@ -100,14 +100,14 @@ void _getNetworkJson(JsonVariant json)
 
 void _getConfigSchemaJson(JsonVariant json)
 {
-  JsonObject configSchema = json.createNestedObject("configSchema");
+  JsonObject configSchema = json["configSchema"].to<JsonObject>();
   
   // Config schema metadata
   configSchema["$schema"] = JSON_SCHEMA_VERSION;
   configSchema["title"] = FW_SHORT_NAME;
   configSchema["type"] = "object";
 
-  JsonObject properties = configSchema.createNestedObject("properties");
+  JsonObject properties = configSchema["properties"].to<JsonObject>();
 
   // Firmware config schema (if any)
   if (!_fwConfigSchema.isNull())
@@ -118,14 +118,14 @@ void _getConfigSchemaJson(JsonVariant json)
 
 void _getCommandSchemaJson(JsonVariant json)
 {
-  JsonObject commandSchema = json.createNestedObject("commandSchema");
+  JsonObject commandSchema = json["commandSchema"].to<JsonObject>();
   
   // Command schema metadata
   commandSchema["$schema"] = JSON_SCHEMA_VERSION;
   commandSchema["title"] = FW_SHORT_NAME;
   commandSchema["type"] = "object";
 
-  JsonObject properties = commandSchema.createNestedObject("properties");
+  JsonObject properties = commandSchema["properties"].to<JsonObject>();
 
   // Firmware command schema (if any)
   if (!_fwCommandSchema.isNull())
@@ -134,7 +134,7 @@ void _getCommandSchemaJson(JsonVariant json)
   }
 
   // Generic commands
-  JsonObject restart = properties.createNestedObject("restart");
+  JsonObject restart = properties["restart"].to<JsonObject>();
   restart["title"] = "Restart";
   restart["type"] = "boolean";
 }
@@ -159,7 +159,7 @@ void _mqttConnected()
   _logger.setTopic(_mqtt.getLogTopic(logTopic));
 
   // Publish device adoption info
-  DynamicJsonDocument json(JSON_ADOPT_MAX_SIZE);
+  JsonDocument json;
   _mqtt.publishAdopt(_api.getAdopt(json.as<JsonVariant>()));
 
   // Log the fact we are now connected
@@ -245,7 +245,7 @@ void _mqttCallback(char * topic, byte * payload, int length)
 void OXRS_WT32ETH01::begin(jsonCallback config, jsonCallback command)
 {
   // Get our firmware details
-  DynamicJsonDocument json(512);
+  JsonDocument json;
   _getFirmwareJson(json.as<JsonVariant>());
 
   // Log firmware details
